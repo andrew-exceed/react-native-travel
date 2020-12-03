@@ -25,12 +25,12 @@ export const TravelListScreen = ({ navigation }) => {
     const [ travelsList, setTravelsList ] = useState([1])
     const [ isDisabledScreen, setIsDisabledScreen ] = useState(false)
     const [listData, setListData] = useState(
-        Array(3)
+        Array(2)
             .fill('')
             .map((_, i) => ({
                 title: `Список ${i + 1}`,
                 data: [
-                    ...Array(5)
+                    ...Array(4)
                         .fill('')
                         .map((_, j) => ({
                             key: `${i}.${j}`,
@@ -70,7 +70,7 @@ export const TravelListScreen = ({ navigation }) => {
         setActiveCityNumber(index)
         const data = await getWeather(travelsList[index]?.city);
         setWeatherInfo(data);
-        setIsDisabledScreen(true);
+        setIsDisabledScreen(false);
     }
 
     const deleteTravel = (uid) => {
@@ -100,7 +100,7 @@ export const TravelListScreen = ({ navigation }) => {
     };
 
     const onRowDidOpen = rowKey => {
-        // console.log('This row opened', rowKey);
+        console.log('This row opened', rowKey);
     };
 
     const pressItem = (id) => {
@@ -169,7 +169,7 @@ export const TravelListScreen = ({ navigation }) => {
                 >add new travel</Button>
             </View>
         :
-            <View>
+            <View style={{flex: 1}}>
                 <View style={styles.cityBlock}>
                     <View style={styles.city}>
                         <Text style={styles.cityText}>
@@ -180,7 +180,7 @@ export const TravelListScreen = ({ navigation }) => {
                         </TouchableOpacity>
                     </View>
                     <Text style={styles.weather}>
-                        {moment(travelsList[activeCityNumber]?.dateTravel).format('MMMM/DD/YYYY')}
+                        {moment(new Date(travelsList[activeCityNumber]?.dateTravel)).format('MMMM/DD/YYYY')}
                     </Text>
                     <Text style={styles.weather}>
                         Погода: {weatherInfo?.main?.temp?.toFixed(1)}℃,&nbsp;

@@ -125,7 +125,7 @@ export const CreateTravelScreen = ({ navigation }) => {
 
             <View style={styles.checkBoxContainer}>
                 <Button onPress={() => setShowDataPicker(true)}> 
-                    {moment(chosenDate).format('MMMM: DD: YYYY')}
+                    {moment(new Date(chosenDate)).format('MMMM: DD: YYYY')}
                 </Button>
             </View>
 

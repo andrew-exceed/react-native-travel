@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as firebase from 'firebase'
-
+import { StackActions } from '@react-navigation/native';
 import { 
     useDispatch,
 } from 'react-redux';
@@ -14,20 +14,24 @@ import userActions from '../actions/userActions'
 export const LoadingScreen = ({ navigation }) => {
     const [ isLoading, setIsLoading ] = useState(true);
     const dispatch = useDispatch();
+    const unsubscribe = navigation.addListener('didFocus', () => {
+        console.log('focussed');
+    });
 
     useEffect(()=>{
         checkIfLoggedIn();
-    })
+        return () => unsubscribe();
+    }, [])
 
     const checkIfLoggedIn = () => {
         firebase.auth().onAuthStateChanged(user => {
             if (user){
                 dispatch(userActions.setUserInfoAction(user));
-                navigation.navigate('TravelList');
+                navigation.dispatch(StackActions.replace('TravelList'));
                 // СreateTravel
                 // TravelList
             } else {
-                navigation.navigate('Login');
+                navigation.dispatch(StackActions.replace('Login'));
             }
             setIsLoading(false)
         })
