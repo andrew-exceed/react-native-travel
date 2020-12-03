@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "381615090176",
+    "firebase_url": "https://passport-rn.firebaseio.com",
+    "project_id": "passport-rn",
+    "storage_bucket": "passport-rn.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381615090176:android:14c69e528f26b1bde5c6e5",
+        "android_client_info": {
+          "package_name": "react.native.passport"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "381615090176-11rmbb7hctt6mhegieett5jgd50ba913.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "react.native.passport",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "381615090176-o9fpq2aog1240tpofm1e4d46d0dmbu2h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAmEHBC0RvsnEWlZqPOrG2u9LDXHfqYbsY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "381615090176-o9fpq2aog1240tpofm1e4d46d0dmbu2h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
