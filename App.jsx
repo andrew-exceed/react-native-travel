@@ -1,23 +1,21 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import React, {  } from 'react';
+import { StyleSheet, TouchableOpacity, View, Image } from "react-native";
 import { useFonts } from 'expo-font';
 import { AppLoading } from 'expo';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { AntDesign } from '@expo/vector-icons';
 
 import { 
   useSelector,
-  useDispatch,
 } from 'react-redux';
-import userActions from './src/actions/userActions'
 
 import GeneralStatusBarColor from './src/mainStyles/GeneralStatusBarColor';
 import LoadingScreen from './src/screens/LoadingScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import TravelListScreen from './src/screens/TravelListScreen';
 import CreateTravelScreen from './src/screens/CreateTravelScreen';
+import CreateSetScreen from './src/screens/CreateSetScreen';
 
 import * as firebase from 'firebase';
 import { firebaseConfig } from './src/config';
@@ -35,33 +33,14 @@ const MyTheme = {
   },
 };
 
-
 export const App = () => {
   let [fontsLoaded] = useFonts({
     'antoutline': require('@ant-design/icons-react-native/fonts/antoutline.ttf'),
   });
-  const dispatch = useDispatch();
   const userInfo = useSelector(state => state.userReducer.userInfo);
-  const navigationRef = React.createRef();
 
-  useEffect(() => {
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        dispatch(userActions.setUserInfoAction(user))
-      }
-    });
-  }, [])
-
-  const HeaderButtons = ({hasNewBttn = false}) => (
+  const HeaderButtons = () => (
     <View style={styles.headerBtns}>
-      {hasNewBttn &&
-        <TouchableOpacity
-          onPress={() => {navigationRef.current.navigate('СreateTravel')}}
-          style={styles.logout}
-        >
-          <MaterialCommunityIcons name="plus-box-outline" size={29} color={white} />
-        </TouchableOpacity>
-      }
       <TouchableOpacity
         onPress={() => firebase.auth().signOut()}
         style={styles.logout}
@@ -70,12 +49,13 @@ export const App = () => {
       </TouchableOpacity>
     </View>
   )
+
   return (
       <>
         <GeneralStatusBarColor backgroundColor={lightBlack} barStyle="light-content"/>
 
         {fontsLoaded ?
-            <NavigationContainer theme={MyTheme} ref={navigationRef}>
+            <NavigationContainer theme={MyTheme} >
               <Stack.Navigator 
                 initialRouteName="Loading"
                 screenOptions={{
@@ -122,7 +102,22 @@ export const App = () => {
                   options={() => ({
                     title: userInfo.displayName,
                     gestureEnabled: false,
-                    headerLeft: null,
+                    headerLeft: () => <Image
+                    style={styles.userPhoto}
+                    source={{
+                    uri: `${userInfo.photoURL}`,
+                    }}
+                />,
+                    headerRight:() => <HeaderButtons hasNewBttn={true} />,
+                  })}
+                />
+                <Stack.Screen 
+                  name="CreateSet" 
+                  initialParams={{ item: null }}
+                  component={CreateSetScreen} 
+                  options={() => ({
+                    title: userInfo.displayName,
+                    gestureEnabled: false,
                     headerRight:() => <HeaderButtons hasNewBttn={true} />,
                   })}
                 />
@@ -144,5 +139,11 @@ const styles = StyleSheet.create({
   },
   headerBtns: {
     flexDirection: 'row',
+  },
+  userPhoto: {
+    width: 45, 
+    height: 45,
+    marginLeft: 10,
+    borderRadius: 5,
   }
 })

@@ -44,20 +44,69 @@ export const CreateTravelScreen = ({ navigation }) => {
 
     const createTravel = () => {
         if (!chosenCity){return null}
-        let newTravel = firebase.database().ref(`/users${userInfo.uid}/travels`).push()
-        newTravel.set({
-            city: chosenCity, 
-            dateTravel: ""+new Date(chosenDate),
-            typeTravel: typeTravel,
+        firebase.database().ref(`/defaultSets`).on('value', (snap)=>{
+            let i = 0;
+            let itemList = [];
+            const resp = snap.val();
+            for (let key in resp){
+                itemList[i] = {
+                    title: resp[key].title,
+                    type: resp[key].type,
+                    data: resp[key].data,
+                }
+                i++;
+            }
+            if (!typeTravel.city) {
+                let index = itemList.findIndex(item => item.type === 'city')
+                itemList.splice(index, 1)
+            }
+            if (!typeTravel.nature) {
+                let index = itemList.findIndex(item => item.type === 'nature')
+                itemList.splice(index, 1)
+            }
+            itemList.map((_, index) => {itemList[index].id = index})
+            let newTravel = firebase.database().ref(`/users${userInfo.uid}/travels`).push();
+            newTravel.set({
+                city: chosenCity, 
+                dateTravel: ""+new Date(chosenDate),
+                typeTravel: typeTravel,
+                data: itemList,
+            });
+            navigation.navigate('TravelList');
         });
-        navigation.navigate('TravelList');
+
+        // let newTravel = firebase.database().ref(`/users${userInfo.uid}/travels`).push()
+        // newTravel.set({
+        //     city: chosenCity, 
+        //     dateTravel: ""+new Date(chosenDate),
+        //     typeTravel: typeTravel,
+        // });
+        // navigation.navigate('TravelList');
+        // let newTravel = firebase.database().ref(`/defaultSets`).push()
+        // newTravel.set({
+        //     title: 'nature set',
+        //     type: 'nature',
+        //     data: [
+        //         {
+        //             text: 'палатка',
+        //             selected: false,
+        //         },
+        //         {
+        //             text: 'котелок',
+        //             selected: false,
+        //         },
+        //         {
+        //             text: 'кот',
+        //             selected: false,
+        //         }
+        //     ]
+        // });
     }
 
     const changeTravelType = (type) => {
         switch (type) {
             case 'city': 
                 {   
-                    console.log(type)
                     setTypeTravel({
                         ...typeTravel,
                         city: !typeTravel.city,
@@ -80,35 +129,38 @@ export const CreateTravelScreen = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.autocompleteContainerForPosition}></View>
+            <View style={styles.autocompleteContainer}>
+                <Autocomplete
+                    listStyle={{
+                        width: '100%',
+                        margin: 0,
+                        zIndex:99,
+                    }}
+                    placeholder='City'
+                    data={citiesList.length ? citiesList.slice(0, 6) : []}
+                    value={chosenCity}
+                    defaultValue={''}
+                    onChangeText={text => cityInputChangeHandler(text)}
+                    keyExtractor={(_, i) => i+''}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity 
+                            onPress={() => {setChosenCity(item?.name); setCitiesList([])}}
+                            style={styles.autocompleteItem}
+                        >
+                            <Text style={styles.autocompleteItemText}>{item.name}</Text>
+                        </TouchableOpacity>
+                    )}
+                    onBlur={() => setCitiesList([])}
+                />
+            </View>
+            <View style={styles.boxContainer}>
+                <Button style={styles.myBtn} onPress={() => setShowDataPicker(true)}> 
+                    {moment(new Date(chosenDate)).format('MMMM: DD: YYYY')}
+                </Button>
+            </View>
 
-            <Autocomplete
-                listContainerStyle={{
-                    width: '100%',
-                }}
-                listStyle={{
-                    width: '100%',
-                    margin: 0,
-                }}
-                inputContainerStyle={{
-                    
-                }}
-                placeholder='City'
-                data={citiesList.length ? citiesList.slice(0, 6) : []}
-                value={chosenCity}
-                defaultValue={''}
-                onChangeText={text => cityInputChangeHandler(text)}
-                keyExtractor={(_, i) => {return i +""}}
-                renderItem={({ item }) => (
-                    <TouchableOpacity 
-                        onPress={() => {setChosenCity(item?.name); setCitiesList([])}}
-                        style={styles.autocompleteItem}
-                    >
-                        <Text style={styles.autocompleteItemText}>{item.name}</Text>
-                    </TouchableOpacity>
-                )}
-            />
-
-            <View style={styles.checkBoxContainer}>
+            <View style={styles.boxContainer}>
                 <TouchableOpacity 
                     style={[styles.typeCheckbox, (typeTravel.city && styles.typeCheckboxActive)]}
                     onPress={() => {changeTravelType('city')}}
@@ -123,12 +175,6 @@ export const CreateTravelScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.checkBoxContainer}>
-                <Button onPress={() => setShowDataPicker(true)}> 
-                    {moment(new Date(chosenDate)).format('MMMM: DD: YYYY')}
-                </Button>
-            </View>
-
             {showDataPicker && (
                 <DateTimePicker
                     testID="dateTimePicker"
@@ -140,13 +186,9 @@ export const CreateTravelScreen = ({ navigation }) => {
                     minimumDate={new Date()}
                 />
             )}
-
-            <Button
-                onPress={() => {createTravel()}}
-            > 
-                Create
-            </Button>
-
+            <View style={styles.boxContainer}>
+                <Button style={styles.myBtn} onPress={() => {createTravel()}}>Create</Button>
+            </View>
         </View>
     );
 }
@@ -155,14 +197,30 @@ export default CreateTravelScreen;
 
 const styles = StyleSheet.create({
     container:{
-        flex: .96,
+        flex: 1,
         paddingHorizontal: 5,
         justifyContent: 'flex-start',
     },
+    autocompleteContainerForPosition:{
+        flex: 1,
+        position: 'relative'
+    },
+    autocompleteContainer: {
+        flex: 1,
+        left: 0,
+        position: 'absolute',
+        right: 0,
+        top: 0,
+        zIndex: 99,
+    },
+    myBtn: {
+        width: '100%'
+    },
     autocompleteItem: {
+        position: "relative",
         paddingLeft: 5,
         paddingRight: 5,
-        height: 30,
+        height: 35,
         justifyContent: 'center',
         borderBottomColor: dark,
         borderBottomWidth: 1,
@@ -171,17 +229,17 @@ const styles = StyleSheet.create({
         fontSize: 17,
         color: lightBlack,
     },
-    checkBoxContainer: {
+    boxContainer: {
         width: '100%',
-        height: 75,
         flexDirection: 'row',
         justifyContent: 'space-around',
-        flex: 1,
         paddingHorizontal: 5,
+        alignItems: 'center',
+        marginVertical: 5,
     },
     typeCheckbox: {
-        height: 70,
-        width: 70,
+        height: 90,
+        width: '48%',
         backgroundColor: grey,
         justifyContent: 'center',
         alignItems: 'center',

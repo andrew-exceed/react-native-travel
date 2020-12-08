@@ -12,15 +12,14 @@ import {
 import userActions from '../actions/userActions'
 
 export const LoadingScreen = ({ navigation }) => {
-    const [ isLoading, setIsLoading ] = useState(true);
     const dispatch = useDispatch();
-    const unsubscribe = navigation.addListener('didFocus', () => {
-        console.log('focussed');
-    });
 
     useEffect(()=>{
-        checkIfLoggedIn();
-        return () => unsubscribe();
+        let cleanupFunction = false;
+        if(!cleanupFunction){
+            checkIfLoggedIn();
+        }
+        return () => cleanupFunction = true;
     }, [])
 
     const checkIfLoggedIn = () => {
@@ -28,19 +27,16 @@ export const LoadingScreen = ({ navigation }) => {
             if (user){
                 dispatch(userActions.setUserInfoAction(user));
                 navigation.dispatch(StackActions.replace('TravelList'));
-                // СreateTravel
-                // TravelList
             } else {
                 navigation.dispatch(StackActions.replace('Login'));
             }
-            setIsLoading(false)
         })
     }
 
     return (
         <View style={styles.container}>
             <Spinner 
-                visible={isLoading}
+                visible={true}
                 textContent={'Loading'}
                 textStyle={styles.spinnerTextStyle}
             />

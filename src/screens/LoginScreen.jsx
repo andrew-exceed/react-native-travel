@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     View,
@@ -25,10 +25,10 @@ export const LoginScreen = () => {
         return false;
     }
 
-    const onSignIn = (googleUser) => {
+    const onSignIn =  (googleUser) => {
         // console.log('Google Auth Response', googleUser);
         // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-        var unsubscribe = firebase.auth().onAuthStateChanged((firebaseUser) => {
+        var unsubscribe = firebase.auth().onAuthStateChanged( async (firebaseUser) => {
             unsubscribe();
             // Check if we are already signed-in Firebase with the correct user.
             if (!isUserEqual(googleUser, firebaseUser)) {
@@ -39,12 +39,12 @@ export const LoginScreen = () => {
                 );
         
             // Sign in with credential from the Google user.
-            firebase.auth().signInWithCredential(credential)
-            .then((result) => {
+            await firebase.auth().signInWithCredential(credential)
+            .then(async (result) => {
                 // console.log('user sigin123');
                 setIsLoading(false);
                 if (result.additionalUserInfo.isNewUser) {
-                    firebase.database().ref('/users' + result.user.uid)
+                    await firebase.database().ref('/users' + result.user.uid)
                     .set({
                         gmail: result.user.email,
                         profile_picture: result.additionalUserInfo.profile.picture, 
@@ -54,7 +54,7 @@ export const LoginScreen = () => {
                         created_at: Date.now(),
                     })
                     .then((snapshot) => {
-                        // console.log('snapshot', snapshot)
+                        // unsubscribe();
                     });
                 } else {
                     firebase.database().ref('/users' + result.user.uid)
@@ -84,7 +84,6 @@ export const LoginScreen = () => {
         setIsLoading(true);
         try {
             const result = await Google.logInAsync({
-                // behavior: 'web',
                 androidClientId: '381615090176-11rmbb7hctt6mhegieett5jgd50ba913.apps.googleusercontent.com',
                 // iosClientId: YOUR_CLIENT_ID_HERE,
                 scopes: ['profile', 'email'],
